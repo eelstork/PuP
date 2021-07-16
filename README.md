@@ -4,10 +4,14 @@ PuP lets you maintain a pip-styled requirements file in your Unity project. This
 
 A typical use case is when team members maintain local dependencies.
 
+**Disclaimer** - Pup is not a mature package manager. Right now requirements may not include community packages or local dependencies.
+
 ## Installation
 
-PuP requires Active Logic or Activ-LT:
-https://assetstore.unity.com/packages/tools/ai/active-lt-behavior-trees-183959
+PuP requires Active Logic or [Activ-LT](
+https://assetstore.unity.com/packages/tools/ai/active-lt-behavior-trees-183959) (free)
+
+For now, just copy Assets/Pup in your project and you are done.
 
 ## Setup
 
