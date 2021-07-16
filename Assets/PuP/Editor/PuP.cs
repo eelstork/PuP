@@ -10,10 +10,10 @@ public class PuP : MonoBehaviour
         new FreezeAction().Apply(verbose: true);
     }
 
-    [MenuItem("Window/Activ/Pup/Apply requirements")]
+    [MenuItem("Window/Activ/Pup/Load requirements")]
     static void Apply(){
         Debug.Log("Load requirements from requirements.txt");
-        Debug.Log("Ensure requirements are in UPM");
+        new LoadAction().Apply();
     }
 
 }}
