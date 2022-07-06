@@ -1,5 +1,9 @@
-[development in progress]
+git URL [development in progress, take care]:
 
-# PuP - Simple requirements for Unity projects
+```
+https://github.com/eelstork/PuP.git?path=/Assets/PuP
+```
+
+# PuP - Crude (yet effective?) dependency management for Unity
 
 Complete rewrite of PuP
