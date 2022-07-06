@@ -1,6 +1,5 @@
 {
-    "name": "com.activ.pup2",
-    "rootNamespace": "",
+    "name": "com.activ.pup",
     "references": [],
     "includePlatforms": [
         "Editor"
