@@ -1,0 +1,26 @@
+{
+  "name": "com.activ.pup",
+  "version": "0.2.2",
+  "displayName": "PuP",
+  "description": "Dependency manager",
+  "unity": "2018.4",
+  "unityRelease": "8f1",
+  "dependencies": { },
+  "keywords": [
+    "logger",
+    "injection",
+    "debugger",
+    "console"
+  ],
+  "author": {
+    "name": "Activ, T.E.A de Souza",
+    "email": "active.behaviours@gmail.com",
+    "url": "https://github.com/active-logic"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eelstork/pup.git"
+  },
+  "type": "tool",
+  "hideInEditor": false
+}
