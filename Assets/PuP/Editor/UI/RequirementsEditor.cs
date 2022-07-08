@@ -13,34 +13,58 @@ public class RequirementsEd : Editor {
     string inputURL;
 
     public override void OnInspectorGUI(){
+        requirements = (Requirements)target;
+        if(!Manager.CanEdit(requirements)){
+            EGL.LabelField($"Claim the 'admin' role in PuP config to edit.");
+            return;
+        }
         if(EditorBusy(out string doing)){
             EGL.LabelField($"Editor is {doing}...");
             return;
         }
-        requirements = (Requirements)target;
         Dependency del = null;
+        bool refresh = false;
         foreach(var e in requirements.dependencies){
             if(!e.isExcluded)
-                Draw(e, out del);
+                Draw(e, out del, ref refresh);
         }
+        // Remove from requirements if [x] was selected
         if(del != null){
-            del.isExcluded = true;
+            RemoveFromRequirements(del);
+        }
+        EGL.Space(8);
+        if(refresh || GL.Button("Apply all")){
             Manager.ApplyDeps();
         }
-        EGL.LabelField("_____________");
         EGL.Space(8);
         PresentAddPackageUI();
     }
 
-    void Draw(Dependency arg, out Dependency delete){
+    void RemoveFromRequirements(Dependency dep){
+        requirements.dependencies.Remove(dep);
+        Log(
+              $"NOTE: deleting {dep} does not uninstall the package;\n"
+            + "to remove a package from locals, select 'DisablePackage' under resolution."
+        );
+    }
+
+    void Draw(Dependency arg, out Dependency delete, ref bool refresh){
         EditorGUIUtility.labelWidth = 70;
         EGL.LabelField("_____________");
         EGL.Space(8);
         arg.name = EGL.TextField(arg.name);
         arg.file = EGL.TextField("File", arg.file);
         arg.gitURL = EGL.TextField("Git URL", arg.gitURL);
+        arg.teamRoles = EGL.TextField("Team Roles", arg.teamRoles);
+        // BOTTOM ROW
         EGL.BeginHorizontal();
-        EGL.EnumPopup(arg.resolution);
+        //
+        Dependency.Resolution newRes = (Dependency.Resolution) EGL.EnumPopup(arg.resolution);
+        if(newRes != arg.resolution){
+            arg.resolution = newRes;
+            refresh = true;
+        }
+        //
         arg.runTests = EGL.Toggle("run tests", arg.runTests);
         GL.FlexibleSpace();
         delete = GL.Button("x", GL.MaxWidth(16f)) ? arg : null;

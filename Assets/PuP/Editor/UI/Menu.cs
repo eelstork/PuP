@@ -12,25 +12,25 @@ public static class Menu{
     public static void UpdatePackages()
     => Manager.UpdatePackages();
 
-    [MenuItem("Window/Activ/PuP/Edit local dependencies")]
-    public static void EditLocalDependencies()
-    => Manager.EditLocalDeps();
-
-    [MenuItem("Window/Activ/PuP/Edit project dependencies")]
+    [MenuItem("Window/Activ/PuP/Edit Project Dependencies")]
     public static void EditProjectDependencies()
     => Manager.EditProjectDeps();
 
-    [MenuItem("Window/Activ/PuP/Remove all dependencies")]
-    public static void RemoveDependencies()
-    => Manager.RemoveAllDeps();
+    [MenuItem("Window/Activ/PuP/Edit Personal Packages")]
+    public static void EditLocalDependencies()
+    => Manager.EditLocalDeps();
+
+    //[MenuItem("Window/Activ/PuP/Remove all dependencies")]
+    //public static void RemoveDependencies()
+    //=> Manager.RemoveAllDeps();
 
     [MenuItem("Window/Activ/PuP/Scan (find local packages)")]
     public static void FindLocalPackages()
     => Manager.FindLocalPackages();
 
-    [MenuItem("Window/Activ/PuP/Online help")]
-    public static void DisplayOnlineHelp()
-    => Log("Display online help");
+    //[MenuItem("Window/Activ/PuP/Online help")]
+    //public static void DisplayOnlineHelp()
+    //=> Log("Display online help");
 
     [MenuItem("Window/Activ/PuP/Config")]
     static void Init(){

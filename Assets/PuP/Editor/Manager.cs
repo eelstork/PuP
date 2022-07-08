@@ -6,20 +6,32 @@ using static UnityEngine.Debug;
 namespace Activ.PuP{
 public static class Manager{
 
+    public const string ProjectRequirements = "Project Dependencies";
+    public const string PersonalRequirements = "Personal Packages";
+    public const string ProjectRequirementsPath = "Project Dependencies";
+    public const string PersonalRequirementsPath = "Local/Personal Packages";
+
     static List<PackageRef> _localPackages;
 
     public static void ApplyDeps(){
-        var common       = ADB.Req<Requirements>("dependencies");
-        var local        = ADB.Req<Requirements>("Local/dependencies");
+        var common       = ADB.Req<Requirements>(ProjectRequirementsPath);
+        var local        = ADB.Req<Requirements>(PersonalRequirementsPath);
         var requirements = common + local;
         Resolver.Apply(requirements.dependencies);
     }
 
+    public static bool CanEdit(Requirements arg){
+        var name = arg.name;
+        if(name != ProjectRequirements) return true;
+        if(Config.roles.Contains("admin")) return true;
+        return false;
+    }
+
     public static void EditLocalDeps()
-    => ADB.Edit<Requirements>("Local/dependencies");
+    => ADB.Edit<Requirements>(PersonalRequirementsPath);
 
     public static void EditProjectDeps()
-    => ADB.Edit<Requirements>("dependencies");
+    => ADB.Edit<Requirements>(ProjectRequirementsPath);
 
     public static void FindLocalPackages(){
         var depth = Config.scanDepth;
