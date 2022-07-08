@@ -1,4 +1,4 @@
-git URL [development in progress, take care]:
+git URL:
 
 ```
 https://github.com/eelstork/PuP.git?path=/Assets/PuP

@@ -51,7 +51,15 @@ public class Dependency{
 
     // Public properties -------------------------------------------
 
-    public bool isExcluded => resolution == Resolution.DisablePackage;
+    public bool isExcluded{
+        set{
+            if(value)
+                resolution = Resolution.DisablePackage;
+            else if(resolution == Resolution.DisablePackage)
+                resolution = Resolution.PreferGitURL;
+        }
+        get => resolution == Resolution.DisablePackage;
+    }
 
     public bool isRequired{ get{
         if(resolution == Resolution.DisablePackage) return false;
