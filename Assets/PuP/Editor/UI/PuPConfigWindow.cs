@@ -12,13 +12,14 @@ public class PuPConfigWindow : EditorWindow{
     static PuPConfigWindow instance;
 
     void OnGUI(){
+        LabelField("Claim roles for select packages");
+        LabelField("(comma separated)");
+        Config.roles = TextField("Team roles", Config.roles);
+        LabelField("(Settings are shared across unity projects)");
         LabelField("Scan roots are used when searching local packages");
         Config.scanRoots = TextField("Paths", Config.scanRoots);
         Config.scanDepth = IntField("Max Depth", Config.scanDepth);
         Config.enableScan = Toggle("Enable scan", Config.enableScan);
-        LabelField("Assign yourself roles for select packages (comma separated)");
-        Config.roles = TextField("Team roles", Config.roles);
-        LabelField("(Settings are shared across unity projects)");
     }
 
     public static void ShowWindow(){
