@@ -10,23 +10,30 @@ namespace Activ.PuP{
 public class RequirementsEd : Editor {
 
     Requirements requirements;
+    string inputURL;
 
     public override void OnInspectorGUI(){
+        if(EditorBusy(out string doing)){
+            EGL.LabelField($"Editor is {doing}...");
+            return;
+        }
         requirements = (Requirements)target;
         Dependency del = null;
         foreach(var e in requirements.dependencies){
-            Draw(e, out del);
+            if(!e.isExcluded)
+                Draw(e, out del);
         }
         if(del != null){
-            requirements.dependencies.Remove(del);
+            del.isExcluded = true;
+            Manager.ApplyDeps();
         }
         EGL.LabelField("_____________");
         EGL.Space(8);
-        PresentAddLocalPackageUI();
+        PresentAddPackageUI();
     }
 
     void Draw(Dependency arg, out Dependency delete){
-        EditorGUIUtility.labelWidth = 60;
+        EditorGUIUtility.labelWidth = 70;
         EGL.LabelField("_____________");
         EGL.Space(8);
         arg.name = EGL.TextField(arg.name);
@@ -41,9 +48,38 @@ public class RequirementsEd : Editor {
         EditorGUIUtility.labelWidth = 0;
     }
 
+    void PresentAddPackageUI(){
+        EditorGUIUtility.labelWidth = 60;
+        EGL.LabelField("Add package...");
+        // Add via internal registry
+        PresentAddCommonPackageUI();
+        // Add local package (via crawler)
+        PresentAddLocalPackageUI();
+        // Add via URL
+        PresentAddViaGitURLUI();
+        //
+        EditorGUIUtility.labelWidth = 0;
+    }
+
+    void PresentAddViaGitURLUI(){
+        EGL.BeginHorizontal();
+        inputURL = EGL.TextField("Git URL", inputURL);
+        if(GL.Button(" + ", GL.MaxWidth(40f))) AddViaURL(inputURL);
+        EGL.EndHorizontal();
+    }
+
+    void PresentAddCommonPackageUI(){
+        int sel = 0;
+        sel = EGL.Popup("Common", sel, InternalRegistry.avail);
+        if(sel > 0){
+            InternalRegistry.AddPackage(sel, to: requirements);
+            Manager.ApplyDeps();
+        }
+    }
+
     void PresentAddLocalPackageUI(){
         int sel = 0;
-        sel = EGL.Popup("Add local package", sel, localPackages);
+        sel = EGL.Popup("Local", sel, localPackages);
         if(sel > 0) AddLocalPackage(sel-1);
     }
 
@@ -58,15 +94,33 @@ public class RequirementsEd : Editor {
         Manager.ApplyDeps();
     }
 
-    string[] localPackages{get{
+    void AddViaURL(string url){
+        requirements.dependencies.Add(new Dependency(){
+            gitURL = url
+        });
+        Manager.ApplyDeps();
+    }
+
+    // TODO we don't want to regenerate the array often
+    string[] localPackages{ get{
         var pkgs = Manager.localPackages;
         var choices = new string[pkgs.Count + 1];
-        choices[0] = "NONE";
+        choices[0] = "...";
         for(int i = 0; i < pkgs.Count; i++){
             // NOTE: backslashes lest popup sees a nested structure
             choices[i + 1] = pkgs[i].ToString().Replace('/', '\\');
         }
         return choices;
     }}
+
+    static bool EditorBusy(out string doing){
+        doing = null;
+        if(UPMClientMethods2.hasPendingJobs) doing = $"processing {UPMClientMethods2.pendingJobsCount} package(s)";
+        if(Ed.isCompiling) doing = "compiling";
+        if(Ed.isPlaying)   doing = "playing";
+        if(Ed.isPaused)    doing = "paused";
+        if(Ed.isPaused)    doing = "updating";
+        return doing != null;
+    }
 
 }}

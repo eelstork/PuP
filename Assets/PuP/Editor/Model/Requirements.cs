@@ -11,6 +11,15 @@ public class Requirements : ScriptableObject{
         this[arg.name] = this[arg.name] + arg;
     }
 
+    public void AddByURL(string gitURL){
+        var dep = ForURL(gitURL);
+        if(dep != null){
+            dep.isExcluded = false;
+        }else{
+            dependencies.Add(new Dependency(){ gitURL = gitURL });
+        }
+    }
+
     public static Requirements operator + (Requirements x, Requirements y)
     {
         Requirements z = ScriptableObject.CreateInstance<Requirements>();
@@ -18,6 +27,10 @@ public class Requirements : ScriptableObject{
         if(x != null) foreach(var e in x.deps) z.Add(e);
         if(z != null) foreach(var e in y.deps) z.Add(e);
         return z;
+    }
+
+    public Dependency ForURL(string url){
+        return deps.Find( x => x.gitURL == url);
     }
 
     public Dependency this[string name]{

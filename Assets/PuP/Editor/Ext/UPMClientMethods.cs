@@ -19,8 +19,8 @@ public static class UPMClientMethods{
                                     string[] removing){
         #if (UNITY_2018 || UNITY_2019)
             AddAndRemove2018(adding, removing);
-        #else
-            UPMClient.AddAndRemove(dep);
+        //#else
+        //    UPMClient.AddAndRemove(dep);
         #endif
     }
 
@@ -40,21 +40,29 @@ public static class UPMClientMethods{
                        where manifest.ContainsEntryWithSubstring(x)
                        select x).ToList();
         if(addList.Count + remList.Count == 1){
-            if(addList.Count == 1)
+            if(addList.Count == 1){
+                Log($"PuP: adding {addList[0].source} via the UPM client");
                 UPMClient.Add(addList[0].source);
-            if(remList.Count == 1)
+            }
+            if(remList.Count == 1){
+                Log($"PuP: removing {remList[0]} via the UPM client");
                 UPMClient.Remove(remList[0]);
+            }
         }else{
             // Add new packages at the top
             int i = 2;
             var outlines = manifest.ToList();
             foreach(var pkg in adding){
+                Log($"PuP: adding {pkg.name} from {pkg.source} (edit manifest)");
                 outlines.Insert(i++, AsJSON(pkg.name, pkg.source));
             }
             // Write lines, filtering removable entries
             StringBuilder @out = new StringBuilder();
             foreach (string line in outlines){
-                if(MatchesAny(line, removing)) continue;
+                if(MatchesAny(line, removing, out string match)){
+                    Log($"PuP: removing {match} from (edit manifest)");
+                    continue;
+                }
                 @out.Append(line + "\n");
             }
             File.WriteAllText(ManifestPath, @out.ToString());
@@ -71,6 +79,17 @@ public static class UPMClientMethods{
         #else
             Log(message ?? "PuP: KINDLY CLICK OUTSIDE THE EDITOR WINDOW TO APPLY CHANGES");
         #endif
+    }
+
+    static bool MatchesAny(string line, IEnumerable<string> arr, out string match){
+        foreach(var e in arr){
+            if(line.Contains(e)){
+                match = e;
+                return true;
+            }
+        }
+        match = null;
+        return false;
     }
 
     static bool MatchesAny(string line, IEnumerable<string> arr){

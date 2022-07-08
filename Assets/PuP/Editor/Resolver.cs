@@ -9,7 +9,7 @@ public static class Resolver{
         //foreach(var dep in deps){
         //    Log($"dep will be applied {dep.Format()}");
         //}
-        UPMClientMethods.AddAndRemove(PackagesToAdd(deps), PackagesToRemove(deps));
+        UPMClientMethods2.AddAndRemove(PackagesToAdd(deps), PackagesToRemove(deps));
     }
 
     static (string name, string source)[] PackagesToAdd(List<Dependency> deps)
