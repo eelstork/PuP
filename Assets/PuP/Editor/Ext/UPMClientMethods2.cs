@@ -96,7 +96,7 @@ public static class UPMClientMethods2{
         int count = 0;
         if(addList != null) count += addList.Count;
         if(remList != null) count += remList.Count;
-        return count;
+        return count + 1;
     }}
 
     public static bool hasPendingJobs
