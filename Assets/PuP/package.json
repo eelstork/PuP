@@ -1,6 +1,6 @@
 {
   "name": "com.activ.pup",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "displayName": "PuP",
   "description": "Dependency manager",
   "unity": "2018.4",
