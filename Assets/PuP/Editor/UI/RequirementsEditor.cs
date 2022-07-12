@@ -4,6 +4,7 @@ using Ed = UnityEditor.EditorApplication;
 using GL = UnityEngine.GUILayout;
 using EGL = UnityEditor.EditorGUILayout;
 using static UnityEngine.Debug;
+using Model = Activ.PuP.RequirementsModel;
 
 namespace Activ.PuP{
 [CustomEditor(typeof(Requirements), true)]
@@ -26,11 +27,11 @@ public class RequirementsEd : Editor {
         bool refresh = false;
         foreach(var e in requirements.dependencies){
             if(!e.isExcluded)
-                Draw(e, out del, ref refresh);
+                DrawDependencyUI(e, ref del, ref refresh);
         }
         // Remove from requirements if [x] was selected
         if(del != null){
-            RemoveFromRequirements(del);
+            Model.Remove(del, from: requirements);
         }
         EGL.Space(8);
         if(refresh || GL.Button("Apply all")){
@@ -40,15 +41,9 @@ public class RequirementsEd : Editor {
         PresentAddPackageUI();
     }
 
-    void RemoveFromRequirements(Dependency dep){
-        requirements.dependencies.Remove(dep);
-        Log(
-              $"NOTE: deleting {dep} does not uninstall the package;\n"
-            + "to remove a package from locals, select 'DisablePackage' under resolution."
-        );
-    }
-
-    void Draw(Dependency arg, out Dependency delete, ref bool refresh){
+    void DrawDependencyUI(Dependency arg,
+                          ref Dependency delete,
+                          ref bool refresh){
         EditorGUIUtility.labelWidth = 70;
         EGL.LabelField("_____________");
         EGL.Space(8);
@@ -59,28 +54,35 @@ public class RequirementsEd : Editor {
         // BOTTOM ROW
         EGL.BeginHorizontal();
         //
-        Dependency.Resolution newRes = (Dependency.Resolution) EGL.EnumPopup(arg.resolution);
+        var newRes =
+            (Dependency.Resolution) EGL.EnumPopup(arg.resolution);
         if(newRes != arg.resolution){
             arg.resolution = newRes;
             refresh = true;
         }
         //
         arg.runTests = EGL.Toggle("run tests", arg.runTests);
+        if(arg.runTests){
+            LogWarning("Enabling 'run tests' is not supported yet");
+            arg.runTests = false;
+        }
         GL.FlexibleSpace();
-        delete = GL.Button("x", GL.MaxWidth(16f)) ? arg : null;
+        if(GL.Button("*", GL.MaxWidth(16f))){
+            delete = arg;
+        }
         EGL.EndHorizontal();
         EditorGUIUtility.labelWidth = 0;
     }
 
     void PresentAddPackageUI(){
-        EditorGUIUtility.labelWidth = 60;
+        EditorGUIUtility.labelWidth = 70;
         EGL.LabelField("Add package...");
-        // Add via internal registry
-        PresentAddCommonPackageUI();
-        // Add local package (via crawler)
-        PresentAddLocalPackageUI();
         // Add via URL
         PresentAddViaGitURLUI();
+        // Add local package (via crawler)
+        PresentAddLocalPackageUI();
+        // Add via internal registry
+        PresentAddCommonPackageUI();
         //
         EditorGUIUtility.labelWidth = 0;
     }
@@ -93,29 +95,13 @@ public class RequirementsEd : Editor {
     }
 
     void PresentAddCommonPackageUI(){
-        int sel = 0;
-        sel = EGL.Popup("Common", sel, InternalRegistry.avail);
-        if(sel > 0){
-            InternalRegistry.AddPackage(sel, to: requirements);
-            Manager.ApplyDeps();
-        }
+        int i = EGL.Popup("Tea's picks", 0, InternalRegistry.avail);
+        Model.AddCommonPackage(i, to: requirements);
     }
 
     void PresentAddLocalPackageUI(){
-        int sel = 0;
-        sel = EGL.Popup("Local", sel, localPackages);
-        if(sel > 0) AddLocalPackage(sel-1);
-    }
-
-    void AddLocalPackage(int index){
-        var @ref = Manager.GetLocalPackage(index);
-        Log($"PuP: Adding {@ref}");
-        requirements.dependencies.Add(new Dependency(){
-            name = @ref.name,
-            //displayName = @ref.displayName,
-            file = @ref.path
-        });
-        Manager.ApplyDeps();
+        var sel = EGL.Popup("Local", 0, localPackages);
+        Model.AddLocalPackage(sel - 1, to: requirements);
     }
 
     void AddViaURL(string url){
