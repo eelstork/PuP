@@ -100,8 +100,12 @@ public class RequirementsEd : Editor {
     }
 
     void PresentAddLocalPackageUI(){
-        var sel = EGL.Popup("Local", 0, localPackages);
-        Model.AddLocalPackage(sel - 1, to: requirements);
+        if(Config.enableScan){
+            var sel = EGL.Popup("Local", 0, localPackages);
+            Model.AddLocalPackage(sel - 1, to: requirements);
+        }else{
+            EGL.LabelField("(Enable 'scan' in PuP config for local packages)");
+        }
     }
 
     void AddViaURL(string url){
