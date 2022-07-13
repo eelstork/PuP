@@ -19,6 +19,8 @@ public static class Crawler{
     static void FindPackages(Dir root, string exclusion,
                              List<PackageRef> refs,
                              int maxDepth){
+        if(root.Name == "PackageCache") return;
+        if(root.Name.StartsWith(".")) return;
         if(IsSameDir(root, exclusion)){
             return;  // no search current proj
         }
