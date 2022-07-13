@@ -1,3 +1,4 @@
+using Env = System.Environment;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -12,8 +13,12 @@ public static class Config{
 
     // TODO ideally default to user home dir
     public static string scanRoots{
-        get => EditorPrefs.GetString(ScanRootsKey, "C:/Users");
-        set => EditorPrefs.SetString(ScanRootsKey, value);
+        get => EditorPrefs.GetString(ScanRootsKey, defaultScanRoot);
+        set{
+            if(string.IsNullOrEmpty(value))
+                value = defaultScanRoot;
+            EditorPrefs.SetString(ScanRootsKey, value);
+        }
     }
 
     public static int scanDepth{
@@ -33,5 +38,8 @@ public static class Config{
 
     public static IEnumerable<string> scanRootsArray
     => from string path in scanRoots.Split(',') select path.Trim();
+
+    static string defaultScanRoot
+        => Env.GetFolderPath(Env.SpecialFolder.Personal);
 
 }}
