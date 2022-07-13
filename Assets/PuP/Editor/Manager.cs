@@ -39,6 +39,7 @@ public static class Manager{
         foreach(var path in Config.scanRootsArray){
             Crawler.FindPackages(path, @out, depth);
         }
+        @out.Sort();
         _localPackages = @out;
     }
 
