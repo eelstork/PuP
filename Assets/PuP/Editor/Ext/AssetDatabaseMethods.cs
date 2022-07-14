@@ -1,12 +1,23 @@
 using System.IO;
-using UnityEngine;
+using UnityEngine; using UnityEditor;
 using ADB = UnityEditor.AssetDatabase;
+using static UnityEngine.Debug;
 
 namespace Activ.PuP{
 public static class AssetDatabaseMethods{
 
-    public static void Edit<T>(string path) where T : ScriptableObject
-    => ADB.OpenAsset(Req<T>(path));
+    // Ref: https://tinyurl.com/yahntp3a this and a better solution
+    #if UNITY_2018_1_OR_NEWER
+    const string inspector = "Window/General/Inspector";
+    #else
+    const string inspector = "Window/Inspector";
+    #endif
+
+    public static void Edit<T>(string path) where T : ScriptableObject{
+        ADB.OpenAsset(Req<T>(path));
+        // NOTE: ensure inspector open and visible
+        EditorApplication.ExecuteMenuItem(inspector);
+    }
 
     public static T Req<T>(string path) where T : ScriptableObject
     => Load<T>(path) ?? Create<T>(path);
