@@ -4,13 +4,16 @@ using static UnityEngine.Debug;
 namespace Activ.PuP{
 [InitializeOnLoad] public class Start{
 
+    const string SessionKey = "Activ.PuP.SessionStart";
+
     static Start(){
-        if(!Config.updateOnStart){
-            Log("PuP: not updating packages");
+        if(SessionState.GetBool(SessionKey, false))
             return;
+        SessionState.SetBool(SessionKey, true);
+        if(Config.updateOnStart){
+            Log("PuP: updating packages...");
+            Manager.ApplyDeps();
         }
-        Log("PuP: updating packages...");
-        Manager.ApplyDeps();
     }
 
 }}
