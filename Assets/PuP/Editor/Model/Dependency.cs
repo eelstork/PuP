@@ -106,7 +106,11 @@ public class Dependency{
 
     static string FileSource(string path){
         if(string.IsNullOrEmpty(path)) return path;
-        return "file:" + path.Replace("\\", "/");
+        var fullpath = System.IO.Path.GetFullPath(path);
+        if(path != fullpath){
+            Log($"PuP: Note: '{path}' expands to '{fullpath}'");
+        }
+        return "file:" + fullpath.Replace("\\", "/");
     }
 
     static string NameFromURL(string url){
