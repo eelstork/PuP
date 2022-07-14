@@ -15,10 +15,12 @@ public class RequirementsEd : Editor {
 
     public override void OnInspectorGUI(){
         requirements = (Requirements)target;
+        //Undo.RecordObject(requirements, $"Modified {requirements.name}");
         if(!Manager.CanEdit(requirements)){
             EGL.LabelField($"Claim the 'admin' role in PuP config to edit.");
             return;
         }
+        EditorUtility.SetDirty(requirements);
         if(EditorBusy(out string doing)){
             EGL.LabelField($"Editor is {doing}...");
             return;
@@ -67,7 +69,7 @@ public class RequirementsEd : Editor {
             arg.runTests = false;
         }
         GL.FlexibleSpace();
-        if(GL.Button("*", GL.MaxWidth(16f))){
+        if(GL.Button("x", GL.MaxWidth(16f))){
             delete = arg;
         }
         EGL.EndHorizontal();
