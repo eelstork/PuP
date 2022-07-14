@@ -20,6 +20,7 @@ public class PuPConfigWindow : EditorWindow{
         Config.scanRoots = TextField("Paths", Config.scanRoots);
         Config.scanDepth = IntField("Max Depth", Config.scanDepth);
         Config.enableScan = Toggle("Enable scan", Config.enableScan);
+        Config.updateOnStart = Toggle("Update on start", Config.updateOnStart);
     }
 
     public static void ShowWindow(){
