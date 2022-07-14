@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Ex = System.Exception;
@@ -71,7 +72,7 @@ public class Dependency{
             case Resolution.PreferGitURL:
                 return EvalSource(gitURL, FileSource(file));
             case Resolution.PreferFile:
-                return EvalSource(FileSource(file), gitURL);
+                return EvalSource(FileSource(file, gitURL), gitURL);
             case Resolution.DisablePackage:
                 throw new Ex("Package is disabled");
             default:
@@ -104,12 +105,25 @@ public class Dependency{
     && !string.IsNullOrEmpty(arg)
     && arg.Trim().Length > 0;
 
-    static string FileSource(string path){
+    static string FileSource(string path, string gitURL){
         if(string.IsNullOrEmpty(path)) return path;
-        var fullpath = System.IO.Path.GetFullPath(path);
+        var fullpath = Path.GetFullPath(path);
         if(path != fullpath){
             Log($"PuP: Note: '{path}' expands to '{fullpath}'");
         }
+        if(!Directory.Exists(fullpath)){
+            GitHelper.Clone(gitURL, fullpath);
+        }
+        if(!Directory.Exists(fullpath)){
+            throw new Ex($"Directory does not exist; `git clone` failed? Tried Git URL '{gitURL}'");
+        }
+
+        return "file:" + fullpath.Replace("\\", "/");
+    }
+
+    static string FileSource(string path){
+        if(string.IsNullOrEmpty(path)) return path;
+        var fullpath = Path.GetFullPath(path);
         return "file:" + fullpath.Replace("\\", "/");
     }
 
