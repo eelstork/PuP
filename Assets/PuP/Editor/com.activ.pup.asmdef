@@ -1,6 +1,8 @@
 {
     "name": "com.activ.pup",
-    "references": [],
+    "references": [
+        "GUID:ae2573f33eee64ea588774051cacaacb"
+    ],
     "includePlatforms": [
         "Editor"
     ],
