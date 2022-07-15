@@ -10,18 +10,24 @@ namespace Activ.PuP{
 public class UPMAgent{
 
     public static UPMAgent ι;
+    float startTime;
+    int depCount;
     List<Dependency> plist;
-    static List<string> remList;
-    static Request request;
+    List<string> remList;
+    Request request;
 
-    public UPMAgent() => ι = this;
+    public UPMAgent(){
+        ι = this;
+        startTime = UnityEngine.Time.time;
+    }
 
     public void StartProcessing(List<Dependency> deps){
         plist = deps;
+        depCount = deps.Count;
         Continue();
     }
 
-    bool Continue() => pending || ProcessNext();
+    bool Continue() => pending || ProcessNext() || End();
 
     bool ProcessNext(){
         if(plist == null) return false;
@@ -50,7 +56,14 @@ public class UPMAgent{
         }
         EditorApplication.update -= OnProgressUpdate;
         request = null;
-        if(hasPendingJobs) Continue();
+        Continue();
+    }
+
+    bool End(){
+        var t = UnityEngine.Time.time;
+        var δ = t - startTime;
+        Log($"PuP: Processed {depCount} package(s) in {δ:0.0}s");
+        return true;
     }
 
     void OnAddReqComplete(AddRequest addRequest){

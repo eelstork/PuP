@@ -49,10 +49,10 @@ public static class Manager{
 
     // NOTE - I don't think this is useful. A 'rebuild' option
     // might still be useful though
-    public static void UpdatePackages(){
-        System.IO.File.Delete("Packages/packages-lock.json");
-        ApplyDeps();
-    }
+    //public static void UpdatePackages(){
+    //    System.IO.File.Delete("Packages/packages-lock.json");
+    //    ApplyDeps();
+    //}
 
     public static int PackageIndex(string name, string path)
     => localPackages.FindIndex(

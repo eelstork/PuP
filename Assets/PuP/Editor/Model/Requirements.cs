@@ -7,6 +7,8 @@ public class Requirements : ScriptableObject{
 
     public List<Dependency> dependencies = new List<Dependency>();
 
+    public int count => dependencies.Count;
+
     public void Add(Dependency arg){
         this[arg.name] = this[arg.name] + arg;
     }

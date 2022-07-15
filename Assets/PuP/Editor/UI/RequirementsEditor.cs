@@ -11,6 +11,7 @@ namespace Activ.PuP{
 public class RequirementsEd : Editor {
 
     Requirements requirements;
+    bool adding = false;
     string inputURL;
 
     public override void OnInspectorGUI(){
@@ -35,11 +36,28 @@ public class RequirementsEd : Editor {
             Model.Remove(del, from: requirements);
         }
         EGL.Space(8);
-        if(refresh || GL.Button("Apply all")){
-            Manager.ApplyDeps();
+        //
+        // FOOTER
+        DrawFooter(refresh);
+    }
+
+    void DrawFooter(bool refresh){
+        GL.BeginHorizontal();
+        if(adding){
+            if(GL.Button("▼ Add package", GL.Width(100)))
+                adding = false;
+        }else if(GL.Button("▶ Add package", GL.Width(100))){
+            adding = true;
+            Manager.FindLocalPackages();
         }
+        if(refresh || (!adding && GL.Button("Apply all"))){
+            Manager.ApplyDeps();
+            return;
+        }
+        GL.EndHorizontal();
+        //
         EGL.Space(8);
-        PresentAddPackageUI();
+        if(adding) PresentAddPackageUI();
     }
 
     void DrawDependencyUI(Dependency arg,
@@ -77,14 +95,9 @@ public class RequirementsEd : Editor {
 
     void PresentAddPackageUI(){
         EditorGUIUtility.labelWidth = 70;
-        EGL.LabelField("Add package...");
-        // Add via URL
-        PresentAddViaGitURLUI();
-        // Add local package (via crawler)
-        PresentAddLocalPackageUI();
-        // Add via internal registry
-        PresentAddCommonPackageUI();
-        //
+        PresentAddViaGitURLUI();      // via git URL
+        PresentAddLocalPackageUI();   // local packages
+        PresentAddCommonPackageUI();  // internal reg.
         EditorGUIUtility.labelWidth = 0;
     }
 
