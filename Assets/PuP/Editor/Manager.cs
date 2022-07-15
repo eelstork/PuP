@@ -47,9 +47,11 @@ public static class Manager{
         Log("PuP: Sorry but this isn't implemented yet!");
     }
 
+    // NOTE - I don't think this is useful. A 'rebuild' option
+    // might still be useful though
     public static void UpdatePackages(){
         System.IO.File.Delete("Packages/packages-lock.json");
-        UPMClientMethods.UpdateAllPackages();
+        ApplyDeps();
     }
 
     public static int PackageIndex(string name, string path)

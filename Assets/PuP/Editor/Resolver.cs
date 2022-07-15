@@ -1,15 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
+using InvOp = System.InvalidOperationException;
 using static UnityEngine.Debug;
 
 namespace Activ.PuP{
 public static class Resolver{
 
+    static UPMAgent agent;
+
     public static void Apply(List<Dependency> deps){
-        //foreach(var dep in deps){
-        //    Log($"dep will be applied {dep.Format()}");
-        //}
-        UPMClientMethods2.AddAndRemove(PackagesToAdd(deps), PackagesToRemove(deps));
+        if(agent?.hasPendingJobs ?? false){
+            throw new InvOp("UPM client is busy");
+        }
+        agent = new UPMAgent();
+        agent.StartProcessing(deps);
     }
 
     static (string name, string source)[] PackagesToAdd(List<Dependency> deps)

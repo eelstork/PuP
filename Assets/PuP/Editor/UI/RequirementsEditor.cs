@@ -28,8 +28,7 @@ public class RequirementsEd : Editor {
         Dependency del = null;
         bool refresh = false;
         foreach(var e in requirements.dependencies){
-            if(!e.isExcluded)
-                DrawDependencyUI(e, ref del, ref refresh);
+            DrawDependencyUI(e, ref del, ref refresh);
         }
         // Remove from requirements if [x] was selected
         if(del != null){
@@ -131,7 +130,9 @@ public class RequirementsEd : Editor {
 
     static bool EditorBusy(out string doing){
         doing = null;
-        if(UPMClientMethods2.hasPendingJobs) doing = $"processing {UPMClientMethods2.pendingJobsCount} package(s)";
+        if(UPMAgent.ι?.hasPendingJobs ?? false){
+            doing = $"processing {UPMAgent.ι.pendingJobsCount} package(s)";
+        }
         if(Ed.isCompiling) doing = "compiling";
         if(Ed.isPlaying)   doing = "playing";
         if(Ed.isPaused)    doing = "paused";
