@@ -24,6 +24,9 @@ public class RequirementsEd : Editor {
         EditorUtility.SetDirty(requirements);
         if(EditorBusy(out string doing)){
             EGL.LabelField($"Editor is {doing}...");
+            if(GL.Button("Stop", GL.Width(60))){
+                Manager.StopProcessing();
+            }
             return;
         }
         Dependency del = null;
@@ -63,13 +66,15 @@ public class RequirementsEd : Editor {
     void DrawDependencyUI(Dependency arg,
                           ref Dependency delete,
                           ref bool refresh){
-        EditorGUIUtility.labelWidth = 70;
+        EditorGUIUtility.labelWidth = 78;
         EGL.LabelField("_____________");
         EGL.Space(8);
         arg.name = EGL.TextField(arg.name);
         arg.file = EGL.TextField("File", arg.file);
         arg.gitURL = EGL.TextField("Git URL", arg.gitURL);
         arg.teamRoles = EGL.TextField("Team Roles", arg.teamRoles);
+        arg.skipUpdates = !EGL.Toggle("auto-update", !arg.skipUpdates);
+        arg.runTests  = EGL.Toggle("run tests", arg.runTests);
         // BOTTOM ROW
         EGL.BeginHorizontal();
         //
@@ -80,7 +85,6 @@ public class RequirementsEd : Editor {
             refresh = true;
         }
         //
-        arg.runTests = EGL.Toggle("run tests", arg.runTests);
         if(arg.runTests){
             LogWarning("Enabling 'run tests' is not supported yet");
             arg.runTests = false;
@@ -143,8 +147,14 @@ public class RequirementsEd : Editor {
 
     static bool EditorBusy(out string doing){
         doing = null;
-        if(UPMAgent.ι?.hasPendingJobs ?? false){
-            doing = $"processing {UPMAgent.ι.pendingJobsCount} package(s)";
+        var agent = UPMAgent.ι;
+        if(agent?.hasPendingJobs ?? false){
+            doing = $"processing {agent.pendingJobsCount} package(s)";
+            if(agent.stopping){
+                doing += $" ({agent.statusString} - stopping)";
+            }else{
+                doing += $" ({agent.statusString})";
+            }
         }
         if(Ed.isCompiling) doing = "compiling";
         if(Ed.isPlaying)   doing = "playing";

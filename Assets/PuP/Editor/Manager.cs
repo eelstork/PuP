@@ -47,12 +47,9 @@ public static class Manager{
         Log("PuP: Sorry but this isn't implemented yet!");
     }
 
-    // NOTE - I don't think this is useful. A 'rebuild' option
-    // might still be useful though
-    //public static void UpdatePackages(){
-    //    System.IO.File.Delete("Packages/packages-lock.json");
-    //    ApplyDeps();
-    //}
+    public static void StopProcessing(){
+        Resolver.Stop();
+    }
 
     public static int PackageIndex(string name, string path)
     => localPackages.FindIndex(

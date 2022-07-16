@@ -11,15 +11,19 @@ public class UPMAgent{
 
     public static UPMAgent ι;
     float startTime;
+    float requestStartTime;
     int depCount;
     List<Dependency> plist;
     List<string> remList;
     Request request;
+    public bool stopping{ get; private set; }
+    public string statusString {get; private set; }
 
     public UPMAgent(){
-        ι = this;
-        startTime = UnityEngine.Time.time;
+        ι = this; startTime = UnityEngine.Time.time;
     }
+
+    public void StopProcessing(){ plist = null; stopping = true; }
 
     public void StartProcessing(List<Dependency> deps){
         plist = deps;
@@ -33,25 +37,43 @@ public class UPMAgent{
         if(plist == null) return false;
         if(plist.Count == 0) plist = null;
         if(plist == null) return false;
+        // TODO - skip updates should not prevent
+        // the agent from removing a package... or adding a missing
+        // package
+        while(plist.Count > 0 && plist[0].skipUpdates){
+            plist.RemoveAt(0);
+        }
+        if(plist.Count == 0){
+            return false;
+        }
         var dep = plist[0];
         if(dep.isRequired){
-            request = Client.Add(dep.source);
+            var src = dep.source;
+            statusString = $"adding {dep.name}";
+            StartRequest(Client.Add(src));
         }else if(dep.isExcluded){
-            request = Client.Remove(dep.name);
+            statusString = $"removing {dep.name}";
+            StartRequest(Client.Remove(dep.name));
         }
-        EditorApplication.update += OnProgressUpdate;
         plist.RemoveAt(0);
         return true;
     }
 
+    void StartRequest(Request arg){
+        request = arg;
+        requestStartTime = UnityEngine.Time.time;
+        EditorApplication.update += OnProgressUpdate;
+    }
+
     void OnProgressUpdate(){
         if(!request.IsCompleted) return;
+        float δ = UnityEngine.Time.time - requestStartTime;
         switch(request){
             case AddRequest add:
-                OnAddReqComplete(add);
+                OnAddReqComplete(add, δ);
                 break;
             case RemoveRequest rem:
-                OnRemReqComplete(rem);
+                OnRemReqComplete(rem, δ);
                 break;
         }
         EditorApplication.update -= OnProgressUpdate;
@@ -60,23 +82,24 @@ public class UPMAgent{
     }
 
     bool End(){
+        plist = null;
         var t = UnityEngine.Time.time;
         var δ = t - startTime;
         Log($"PuP: Processed {depCount} package(s) in {δ:0.0}s");
         return true;
     }
 
-    void OnAddReqComplete(AddRequest addRequest){
+    void OnAddReqComplete(AddRequest addRequest, float δ){
         if (addRequest.Status == StatusCode.Success){
-            Log("PuP: Added " + addRequest.Result.packageId);
+            Log($"PuP: Added {addRequest.Result.packageId} in {δ:0.0}s");
         }else if (addRequest.Status >= StatusCode.Failure){
-            LogWarning("PuP: " + addRequest.Error.message);
+            LogWarning($"PuP: " + addRequest.Error.message);
         }
     }
 
-    void OnRemReqComplete(RemoveRequest removeRequest){
+    void OnRemReqComplete(RemoveRequest removeRequest, float δ){
         if (removeRequest.Status == StatusCode.Success){
-            Log($"PuP: Removed {removeRequest.PackageIdOrName}");
+            Log($"PuP: Removed {removeRequest.PackageIdOrName} in {δ:0.0}s");
         }else if (removeRequest.Status >= StatusCode.Failure){
             var msg = removeRequest.Error.message;
             if(IsIrrelevant(msg)){

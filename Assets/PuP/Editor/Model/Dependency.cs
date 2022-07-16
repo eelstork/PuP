@@ -15,6 +15,7 @@ public class Dependency{
     [User] public string name, gitURL, file;
     [User] public Resolution resolution;
     [User] public bool runTests;
+    [User] public bool skipUpdates;
     [User] public string teamRoles;
 
     // Functions ---------------------------------------------------
@@ -84,12 +85,13 @@ public class Dependency{
 
     public static Dependency operator + (Dependency x, Dependency y)
     => new Dependency(){
-        name       = y?.name       ?? x?.name,
-        gitURL     = y?.gitURL     ?? x?.gitURL,
-        file       = y?.file       ?? x?.file,
-        resolution = y?.resolution ?? x?.resolution ?? Resolution.PreferGitURL,
-        runTests   = y?.runTests   ?? x?.runTests   ?? false,
-        teamRoles  = y?.teamRoles  ?? x?.teamRoles  ?? ""
+        name        = y?.name        ?? x?.name,
+        gitURL      = y?.gitURL      ?? x?.gitURL,
+        file        = y?.file        ?? x?.file,
+        resolution  = y?.resolution  ?? x?.resolution  ?? Resolution.PreferGitURL,
+        runTests    = y?.runTests    ?? x?.runTests    ?? false,
+        teamRoles   = y?.teamRoles   ?? x?.teamRoles   ?? "",
+        skipUpdates = y?.skipUpdates ?? x?.skipUpdates ?? false
     };
 
     // PRIVATE =====================================================

@@ -16,6 +16,10 @@ public static class Resolver{
         agent.StartProcessing(deps);
     }
 
+    public static void Stop(){
+        agent?.StopProcessing();
+    }
+
     static (string name, string source)[] PackagesToAdd(List<Dependency> deps)
     => (from e in deps where e.isRequired
         select (e.name, e.source)).ToArray();
