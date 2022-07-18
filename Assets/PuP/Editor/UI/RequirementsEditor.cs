@@ -147,13 +147,13 @@ public class RequirementsEd : Editor {
 
     static bool EditorBusy(out string doing){
         doing = null;
-        var agent = UPMAgent.ι;
-        if(agent?.hasPendingJobs ?? false){
-            doing = $"processing {agent.pendingJobsCount} package(s)";
-            if(agent.stopping){
-                doing += $" ({agent.statusString} - stopping)";
+        var queue = ProcessingQueue.ι;
+        if(queue?.hasPendingJobs ?? false){
+            doing = $"processing {queue.pendingJobsCount} package(s)";
+            if(queue.stopping){
+                doing += $" ({queue.statusString} - stopping)";
             }else{
-                doing += $" ({agent.statusString})";
+                doing += $" ({queue.statusString})";
             }
         }
         if(Ed.isCompiling) doing = "compiling";

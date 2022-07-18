@@ -7,9 +7,9 @@ using UnityEditor.PackageManager;
 using static UnityEngine.Debug;
 
 namespace Activ.PuP{
-public class UPMAgent{
+public class ProcessingQueue{
 
-    public static UPMAgent ι;
+    public static ProcessingQueue ι;
     float startTime;
     float requestStartTime;
     int depCount;
@@ -19,7 +19,7 @@ public class UPMAgent{
     public bool stopping{ get; private set; }
     public string statusString {get; private set; }
 
-    public UPMAgent(){
+    public ProcessingQueue(){
         ι = this; startTime = UnityEngine.Time.time;
     }
 
@@ -48,7 +48,7 @@ public class UPMAgent{
         }
         var dep = plist[0];
         if(dep.isRequired){
-            var src = dep.source;
+            var src = Preprocessor.UpdateSource(dep);
             statusString = $"adding {dep.name}";
             StartRequest(Client.Add(src));
         }else if(dep.isExcluded){

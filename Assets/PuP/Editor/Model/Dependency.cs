@@ -11,6 +11,7 @@ namespace Activ.PuP{
 public class Dependency{
 
     public enum Resolution{ PreferGitURL, PreferFile, DisablePackage }
+    public enum SourceStatus{ Local, Remote, Invalid, Disabled }
 
     [User] public string name, gitURL, file;
     [User] public Resolution resolution;
@@ -68,19 +69,6 @@ public class Dependency{
         return RoleManager.Validate(teamRoles);
     }}
 
-    public string source{ get{
-        switch (resolution){
-            case Resolution.PreferGitURL:
-                return EvalSource(gitURL, FileSource(file));
-            case Resolution.PreferFile:
-                return EvalSource(FileSource(file, gitURL), gitURL);
-            case Resolution.DisablePackage:
-                throw new Ex("Package is disabled");
-            default:
-                throw new Ex($"Unknown resolution policy: {resolution}");
-        }
-    }}
-
     // Ops and static ----------------------------------------------
 
     public static Dependency operator + (Dependency x, Dependency y)
@@ -102,26 +90,40 @@ public class Dependency{
         return null;
     }
 
+    public string GetSource(out SourceStatus status){
+        switch (resolution){
+            case Resolution.PreferGitURL:
+                if(hasValidRemote){
+                    status = SourceStatus.Remote;
+                    return gitURL;
+                }else if(hasValidLocal){
+                    status = SourceStatus.Local;
+                    return file;
+                }
+                break;
+            case Resolution.PreferFile:
+                if(hasValidRemote){
+                    status = SourceStatus.Remote;
+                    return gitURL;
+                }else if(hasValidLocal){
+                    status = SourceStatus.Local;
+                    return file;
+                }
+                break;
+            case Resolution.DisablePackage:
+                status = SourceStatus.Disabled;
+                return null;
+            default:
+                throw new Ex($"Unknown resolution policy: {resolution}");
+        }
+        status = SourceStatus.Invalid;
+        return null;
+    }
+
     bool IsValidSource(string arg)
     => arg != null
     && !string.IsNullOrEmpty(arg)
     && arg.Trim().Length > 0;
-
-    static string FileSource(string path, string gitURL){
-        if(string.IsNullOrEmpty(path)) return path;
-        var fullpath = Path.GetFullPath(path);
-        if(path != fullpath){
-            Log($"PuP: Note: '{path}' expands to '{fullpath}'");
-        }
-        if(!Directory.Exists(fullpath)){
-            GitHelper.Clone(gitURL, fullpath);
-        }
-        if(!Directory.Exists(fullpath)){
-            throw new Ex($"Directory does not exist; `git clone` failed? Tried Git URL '{gitURL}'");
-        }
-
-        return "file:" + fullpath.Replace("\\", "/");
-    }
 
     static string FileSource(string path){
         if(string.IsNullOrEmpty(path)) return path;
@@ -141,5 +143,11 @@ public class Dependency{
     static string NameFromFile(string file){
         return NameFromURL(file);
     }
+
+    // Private properties ==========================================
+
+    bool hasValidLocal => IsValidSource(file);
+
+    bool hasValidRemote => IsValidSource(gitURL);
 
 }}
