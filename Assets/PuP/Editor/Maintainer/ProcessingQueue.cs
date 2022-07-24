@@ -48,9 +48,14 @@ public class ProcessingQueue{
         }
         var dep = plist[0];
         if(dep.isRequired){
-            var src = Preprocessor.UpdateSource(dep);
-            statusString = $"adding {dep.name}";
-            StartRequest(Client.Add(src));
+            var src = Preprocessor.UpdateSource(dep, out string message);
+            if(src != null)
+            {
+                statusString = $"adding {dep.name}";
+                StartRequest(Client.Add(src));
+            }else{
+                LogWarning($"Not processing package: {message}");
+            }
         }else if(dep.isExcluded){
             statusString = $"removing {dep.name}";
             StartRequest(Client.Remove(dep.name));

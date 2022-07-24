@@ -9,8 +9,12 @@ public class Requirements : ScriptableObject{
 
     public int count => dependencies.Count;
 
-    public void Add(Dependency arg){
-        this[arg.name] = this[arg.name] + arg;
+    public void Add(Dependency arg, bool preserveRefs = false){
+        if(preserveRefs){
+            this[arg.name] = arg;
+        }else{
+            this[arg.name] = this[arg.name] + arg;
+        }
     }
 
     public void AddByURL(string gitURL){
@@ -20,6 +24,14 @@ public class Requirements : ScriptableObject{
         }else{
             dependencies.Add(new Dependency(){ gitURL = gitURL });
         }
+    }
+
+    public static Requirements Combine(Requirements x, Requirements y){
+        Requirements z = ScriptableObject.CreateInstance<Requirements>();
+        z.name = $"({x.name} ∪ {y.name})";
+        if(x != null) foreach(var e in x.deps) z.Add(e, preserveRefs: true);
+        if(z != null) foreach(var e in y.deps) z.Add(e, preserveRefs: true);
+        return z;
     }
 
     public static Requirements operator + (Requirements x, Requirements y)

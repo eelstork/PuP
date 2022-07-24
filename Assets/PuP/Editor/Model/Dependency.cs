@@ -18,6 +18,7 @@ public class Dependency{
     [User] public bool runTests;
     [User] public bool skipUpdates;
     [User] public string teamRoles;
+    public string log;
 
     // Functions ---------------------------------------------------
 
@@ -102,12 +103,12 @@ public class Dependency{
                 }
                 break;
             case Resolution.PreferFile:
-                if(hasValidRemote){
-                    status = SourceStatus.Remote;
-                    return gitURL;
-                }else if(hasValidLocal){
+                if(hasValidLocal){
                     status = SourceStatus.Local;
                     return file;
+                }else if(hasValidRemote){
+                    status = SourceStatus.Remote;
+                    return gitURL;
                 }
                 break;
             case Resolution.DisablePackage:

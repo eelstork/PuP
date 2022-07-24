@@ -16,7 +16,7 @@ public static class Manager{
     public static void ApplyDeps(){
         var common       = ADB.Req<Requirements>(ProjectRequirementsPath);
         var local        = ADB.Req<Requirements>(PersonalRequirementsPath);
-        var requirements = common + local;
+        var requirements = Requirements.Combine(common, local);
         Resolver.Apply(requirements.dependencies);
     }
 

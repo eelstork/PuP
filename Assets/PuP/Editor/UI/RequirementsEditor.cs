@@ -94,6 +94,10 @@ public class RequirementsEd : Editor {
             delete = arg;
         }
         EGL.EndHorizontal();
+        if(arg.log != null && arg.log.Length > 0){
+            Vector2? scroll = null;
+            UpdateLogDrawer.DrawLog(arg.log, ref scroll);
+        }
         EditorGUIUtility.labelWidth = 0;
     }
 
