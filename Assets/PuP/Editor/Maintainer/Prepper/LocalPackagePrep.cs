@@ -6,7 +6,7 @@ using Ex = System.Exception;
 namespace Activ.PuP{
 public class LocalPackagePrep{
 
-    public string log => _log.ToString();
+    public string log => _log?.ToString();
     StringBuilder _log = new StringBuilder();
 
     public string Process(string path, Dependency dep){
@@ -14,6 +14,7 @@ public class LocalPackagePrep{
         if(string.IsNullOrEmpty(path)){
             throw new ArgEx($"Null or empty source path for {dep}");
         }
+        
         var fullpath = Path.GetFullPath(path).Replace("\\", "/");
         if(path != fullpath){
             Log($"PuP: Note: '{path}' expands to '{fullpath}'");
@@ -24,9 +25,12 @@ public class LocalPackagePrep{
         if(!Directory.Exists(fullpath)){
             throw new Ex($"Directory does not exist; `git clone` failed? Tried Git URL '{url}'");
         }
-        //
-        UpdateRepo(pathToRepo);
-        //
+        if(!dep.skipUpdates){
+            UpdateRepo(pathToRepo);
+        }else{
+            _log = null;
+            return null;
+        }
         return "file:" + fullpath.Replace("\\", "/");
     }
 

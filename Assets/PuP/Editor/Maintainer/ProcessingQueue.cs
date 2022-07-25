@@ -40,9 +40,9 @@ public class ProcessingQueue{
         // TODO - skip updates should not prevent
         // the agent from removing a package... or adding a missing
         // package
-        while(plist.Count > 0 && plist[0].skipUpdates){
-            plist.RemoveAt(0);
-        }
+        //while(plist.Count > 0 && plist[0].skipUpdates){
+        //    plist.RemoveAt(0);
+        //}
         if(plist.Count == 0){
             return false;
         }
@@ -54,7 +54,9 @@ public class ProcessingQueue{
                 statusString = $"adding {dep.name}";
                 StartRequest(Client.Add(src));
             }else{
-                LogWarning($"Not processing package: {message}");
+                //LogWarning($"Skipping processing {dep}: {message}");
+                plist.RemoveAt(0);
+                return Continue();
             }
         }else if(dep.isExcluded){
             statusString = $"removing {dep.name}";
