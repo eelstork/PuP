@@ -14,7 +14,7 @@ public class LocalPackagePrep{
         if(string.IsNullOrEmpty(path)){
             throw new ArgEx($"Null or empty source path for {dep}");
         }
-        
+
         var fullpath = Path.GetFullPath(path).Replace("\\", "/");
         if(path != fullpath){
             Log($"PuP: Note: '{path}' expands to '{fullpath}'");
@@ -43,6 +43,10 @@ public class LocalPackagePrep{
     string UpdateRepo(string path){
         var @out = GitRunner.Cmd(path, "status");
         Log($"[git status] > {@out}");
+        if(DenotesModifiedRepo(@out)){
+            Log("Repository has local changes; not updating");
+            return @out;
+        }
         @out = GitRunner.Cmd(path, "reset --hard");
         Log($"[git reset --hard] > {@out}");
         @out = GitRunner.Cmd(path, "clean -fd");
@@ -51,6 +55,13 @@ public class LocalPackagePrep{
         @out = GitRunner.Cmd(path, "pull --force");
         Log($"[git pull --force] > {@out}");
         return @out;
+    }
+
+    bool DenotesModifiedRepo(string arg){
+        var str = arg.ToLower();
+        return str.Contains("untracked")
+            || str.Contains("deleted")
+            || str.Contains("modified");
     }
 
     string PathToRepo(string path, string gitURL){
