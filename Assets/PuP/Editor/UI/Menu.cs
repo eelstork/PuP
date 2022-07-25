@@ -8,9 +8,9 @@ public static class Menu{
     public static void ApplyDependencies()
     => Manager.ApplyDeps();
 
-    [MenuItem("Window/Activ/PuP/Update packages")]
-    public static void UpdatePackages()
-    => Manager.UpdatePackages();
+    //[MenuItem("Window/Activ/PuP/Update packages")]
+    //public static void UpdatePackages()
+    //=> Manager.UpdatePackages();
 
     [MenuItem("Window/Activ/PuP/Edit Project Dependencies")]
     public static void EditProjectDependencies()
@@ -24,9 +24,9 @@ public static class Menu{
     //public static void RemoveDependencies()
     //=> Manager.RemoveAllDeps();
 
-    [MenuItem("Window/Activ/PuP/Scan (find local packages)")]
-    public static void FindLocalPackages()
-    => Manager.FindLocalPackages();
+    //[MenuItem("Window/Activ/PuP/Scan (find local packages)")]
+    //public static void FindLocalPackages()
+    //=> Manager.FindLocalPackages();
 
     //[MenuItem("Window/Activ/PuP/Online help")]
     //public static void DisplayOnlineHelp()

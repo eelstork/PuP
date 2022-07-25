@@ -16,7 +16,7 @@ public static class Manager{
     public static void ApplyDeps(){
         var common       = ADB.Req<Requirements>(ProjectRequirementsPath);
         var local        = ADB.Req<Requirements>(PersonalRequirementsPath);
-        var requirements = common + local;
+        var requirements = Requirements.Combine(common, local);
         Resolver.Apply(requirements.dependencies);
     }
 
@@ -47,9 +47,8 @@ public static class Manager{
         Log("PuP: Sorry but this isn't implemented yet!");
     }
 
-    public static void UpdatePackages(){
-        System.IO.File.Delete("Packages/packages-lock.json");
-        UPMClientMethods.UpdateAllPackages();
+    public static void StopProcessing(){
+        Resolver.Stop();
     }
 
     public static int PackageIndex(string name, string path)

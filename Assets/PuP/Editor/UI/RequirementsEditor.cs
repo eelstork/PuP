@@ -11,46 +11,70 @@ namespace Activ.PuP{
 public class RequirementsEd : Editor {
 
     Requirements requirements;
+    bool adding = false;
     string inputURL;
 
     public override void OnInspectorGUI(){
         requirements = (Requirements)target;
+        //Undo.RecordObject(requirements, $"Modified {requirements.name}");
         if(!Manager.CanEdit(requirements)){
             EGL.LabelField($"Claim the 'admin' role in PuP config to edit.");
             return;
         }
+        EditorUtility.SetDirty(requirements);
         if(EditorBusy(out string doing)){
             EGL.LabelField($"Editor is {doing}...");
+            if(GL.Button("Stop", GL.Width(60))){
+                Manager.StopProcessing();
+            }
             return;
         }
         Dependency del = null;
         bool refresh = false;
         foreach(var e in requirements.dependencies){
-            if(!e.isExcluded)
-                DrawDependencyUI(e, ref del, ref refresh);
+            DrawDependencyUI(e, ref del, ref refresh);
         }
         // Remove from requirements if [x] was selected
         if(del != null){
             Model.Remove(del, from: requirements);
         }
         EGL.Space(8);
-        if(refresh || GL.Button("Apply all")){
-            Manager.ApplyDeps();
+        //
+        // FOOTER
+        DrawFooter(refresh);
+    }
+
+    void DrawFooter(bool refresh){
+        GL.BeginHorizontal();
+        if(adding){
+            if(GL.Button("▼ Add package", GL.Width(100)))
+                adding = false;
+        }else if(GL.Button("▶ Add package", GL.Width(100))){
+            adding = true;
+            Manager.FindLocalPackages();
         }
+        if(refresh || (!adding && GL.Button("Apply all"))){
+            Manager.ApplyDeps();
+            return;
+        }
+        GL.EndHorizontal();
+        //
         EGL.Space(8);
-        PresentAddPackageUI();
+        if(adding) PresentAddPackageUI();
     }
 
     void DrawDependencyUI(Dependency arg,
                           ref Dependency delete,
                           ref bool refresh){
-        EditorGUIUtility.labelWidth = 70;
+        EditorGUIUtility.labelWidth = 78;
         EGL.LabelField("_____________");
         EGL.Space(8);
         arg.name = EGL.TextField(arg.name);
         arg.file = EGL.TextField("File", arg.file);
         arg.gitURL = EGL.TextField("Git URL", arg.gitURL);
         arg.teamRoles = EGL.TextField("Team Roles", arg.teamRoles);
+        arg.skipUpdates = !EGL.Toggle("auto-update", !arg.skipUpdates);
+        arg.runTests  = EGL.Toggle("run tests", arg.runTests);
         // BOTTOM ROW
         EGL.BeginHorizontal();
         //
@@ -61,29 +85,27 @@ public class RequirementsEd : Editor {
             refresh = true;
         }
         //
-        arg.runTests = EGL.Toggle("run tests", arg.runTests);
         if(arg.runTests){
             LogWarning("Enabling 'run tests' is not supported yet");
             arg.runTests = false;
         }
         GL.FlexibleSpace();
-        if(GL.Button("*", GL.MaxWidth(16f))){
+        if(GL.Button("x", GL.MaxWidth(16f))){
             delete = arg;
         }
         EGL.EndHorizontal();
+        if(arg.log != null && arg.log.Length > 0){
+            Vector2? scroll = null;
+            UpdateLogDrawer.DrawLog(arg.log, ref scroll);
+        }
         EditorGUIUtility.labelWidth = 0;
     }
 
     void PresentAddPackageUI(){
         EditorGUIUtility.labelWidth = 70;
-        EGL.LabelField("Add package...");
-        // Add via URL
-        PresentAddViaGitURLUI();
-        // Add local package (via crawler)
-        PresentAddLocalPackageUI();
-        // Add via internal registry
-        PresentAddCommonPackageUI();
-        //
+        PresentAddViaGitURLUI();      // via git URL
+        PresentAddLocalPackageUI();   // local packages
+        PresentAddCommonPackageUI();  // internal reg.
         EditorGUIUtility.labelWidth = 0;
     }
 
@@ -129,7 +151,15 @@ public class RequirementsEd : Editor {
 
     static bool EditorBusy(out string doing){
         doing = null;
-        if(UPMClientMethods2.hasPendingJobs) doing = $"processing {UPMClientMethods2.pendingJobsCount} package(s)";
+        var queue = ProcessingQueue.ι;
+        if(queue?.hasPendingJobs ?? false){
+            doing = $"processing {queue.pendingJobsCount} package(s)";
+            if(queue.stopping){
+                doing += $" ({queue.statusString} - stopping)";
+            }else{
+                doing += $" ({queue.statusString})";
+            }
+        }
         if(Ed.isCompiling) doing = "compiling";
         if(Ed.isPlaying)   doing = "playing";
         if(Ed.isPaused)    doing = "paused";
