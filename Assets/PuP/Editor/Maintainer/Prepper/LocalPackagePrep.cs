@@ -10,14 +10,16 @@ public class LocalPackagePrep{
     StringBuilder _log = new StringBuilder();
 
     public string Process(string path, Dependency dep){
-        var url = dep.gitURL;
         if(string.IsNullOrEmpty(path)){
             throw new ArgEx($"Null or empty source path for {dep}");
         }
-
         var fullpath = Path.GetFullPath(path).Replace("\\", "/");
         if(path != fullpath){
             Log($"PuP: Note: '{path}' expands to '{fullpath}'");
+        }
+        var url = dep.gitURL;
+        if(string.IsNullOrEmpty(url)){
+            return ToURI(fullpath);
         }
         var pathToRepo = PathToRepo(fullpath, url);
         if(!Directory.Exists(pathToRepo))
@@ -31,8 +33,11 @@ public class LocalPackagePrep{
             _log = null;
             return null;
         }
-        return "file:" + fullpath.Replace("\\", "/");
+        return ToURI(fullpath);
     }
+
+    string ToURI(string fullpath)
+    => "file:" + fullpath.Replace("\\", "/");
 
     void CloneRepo(string gitURL, string fullpath){
         Log($"Clone repository:\n{gitURL} => {fullpath}");
