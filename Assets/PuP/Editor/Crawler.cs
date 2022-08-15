@@ -21,6 +21,7 @@ public static class Crawler{
                              int maxDepth){
         if(root.Name == "PackageCache") return;
         if(root.Name.StartsWith(".")) return;
+        if(root.Name == "$RECYCLE.BIN") return;
         if(IsSameDir(root, exclusion)){
             return;  // no search current proj
         }
