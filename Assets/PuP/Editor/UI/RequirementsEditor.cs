@@ -22,9 +22,9 @@ public class RequirementsEd : Editor {
             return;
         }
         EditorUtility.SetDirty(requirements);
-        if(EditorBusy(out string doing)){
+        if(EditorBusy(out string doing, out bool canStop)){
             EGL.LabelField($"Editor is {doing}...");
-            if(GL.Button("Stop", GL.Width(60))){
+            if(canStop && GL.Button("Stop", GL.Width(60))){
                 Manager.StopProcessing();
             }
             return;
@@ -149,8 +149,9 @@ public class RequirementsEd : Editor {
         return choices;
     }}
 
-    static bool EditorBusy(out string doing){
+    static bool EditorBusy(out string doing, out bool canStop){
         doing = null;
+        canStop = false;
         var queue = ProcessingQueue.ι;
         if(queue?.hasPendingJobs ?? false){
             doing = $"processing {queue.pendingJobsCount} package(s)";
@@ -159,12 +160,17 @@ public class RequirementsEd : Editor {
             }else{
                 doing += $" ({queue.statusString})";
             }
+            canStop = true;
         }
+        if(!manifestExists) doing = "awaiting signal; click outside the editor window";
         if(Ed.isCompiling) doing = "compiling";
         if(Ed.isPlaying)   doing = "playing";
         if(Ed.isPaused)    doing = "paused";
         if(Ed.isPaused)    doing = "updating";
         return doing != null;
     }
+
+    static bool manifestExists
+        => System.IO.File.Exists("Packages/manifest.json");
 
 }}

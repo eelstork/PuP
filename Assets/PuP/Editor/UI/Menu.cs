@@ -20,9 +20,9 @@ public static class Menu{
     public static void EditLocalDependencies()
     => Manager.EditLocalDeps();
 
-    //[MenuItem("Window/Activ/PuP/Remove all dependencies")]
-    //public static void RemoveDependencies()
-    //=> Manager.RemoveAllDeps();
+    [MenuItem("Window/Activ/PuP/Delete manifest.json")]
+    public static void Rebuild()
+    => Manager.Rebuild();
 
     //[MenuItem("Window/Activ/PuP/Scan (find local packages)")]
     //public static void FindLocalPackages()

@@ -43,8 +43,8 @@ public static class Manager{
         _localPackages = @out;
     }
 
-    public static void RemoveAllDeps(){
-        Log("PuP: Sorry but this isn't implemented yet!");
+    public static void Rebuild(){
+        System.IO.File.Delete("Packages/manifest.json");
     }
 
     public static void StopProcessing(){
